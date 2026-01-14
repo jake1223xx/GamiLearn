@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamiLearn - Gamified Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* LOGIN PAGE */
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+            background: rgb(95, 189, 226);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 15px #ddd;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            position: relative;
+            width: 90%;
+            margin: 10px auto;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 95%;
+            padding: 12px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        /* DASHBOARD LAYOUT */
+        .dashboard {
+            display: none; /* Hidden by default */
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 230px;
+            background: #222;
+            color: white;
+            padding: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+            background: white;
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #007bff;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid #222;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin: 5px 0 0;
+        }
+
+        .profile-role {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* AVATAR MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .avatar-option.selected {
+            border-color: #007bff;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-btn.primary { background: #007bff; color: white; }
+        .modal-btn.secondary { background: #ccc; color: black; }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #333;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .sidebar li.active,
+        .sidebar li:hover {
+            background: #007bff;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            margin: 0;
+            flex: 1;
+            padding: 25px;
+            background: transparent;
+        }
+
+        /* VIEWS */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* CARDS */
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #ddd;
+        }
+
+        .big {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* LESSONS */
+        .lesson-box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #ddd;
+        }
+
+        .lesson-detail {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #ddd;
+            max-width: 800px;
+            margin: auto;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .lesson-detail p {
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .start-btn:hover {
+            background: #0056b3;
+        }
+
+        /* QUIZ */
+        .quiz-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .quiz-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        .answer-btn:hover {
+            background: #0056b3;
+        }
+
+        .correct { background: green !important; }
+        .wrong { background: crimson !important; }
+
+        .next-btn {
+            margin-top: 15px;
+            padding: 12px;
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .error {
+            color: crimson;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* GAMES */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .game-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: #007bff;
+        }
+
+        .game-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* MEMORY GAME */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .memory-card {
+            background: #007bff;
+            height: 80px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .memory-card.flipped {
+            background: white;
+            color: #333;
+            border: 2px solid #007bff;
+            transform: rotateY(180deg);
+        }
+
+        .scramble-box {
+            font-size: 32px;
+            letter-spacing: 5px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            background: #eee;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        /* MATH SETTINGS */
+        .settings-box {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .option-group {
+            margin: 20px 0;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .choice-btn {
+            padding: 12px 20px;
+            margin: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 50px; /* Bubble shape */
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .choice-btn.active {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+        }
+
+        /* LEVEL BUBBLE */
+        .level-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.4);
+            margin: 10px auto;
+            border: 4px solid #fff;
+            position: relative;
+        }
+
+        .level-circle::after {
+            content: 'LVL';
+            position: absolute;
+            bottom: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* POINTS BUBBLE */
+        .bubble-points {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+            margin: 10px auto;
+            border: 4px solid #fff;
+            position: relative;
+        }
+        .bubble-points::after {
+            content: 'PTS';
+            position: absolute;
+            bottom: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* STREAK BUBBLE */
+        .bubble-streak {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 94, 98, 0.4);
+            margin: 10px auto;
+            border: 4px solid #fff;
+            position: relative;
+        }
+        .bubble-streak::after {
+            content: 'DAYS';
+            position: absolute;
+            bottom: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.8);
+        }
+        /* Level Up Modal */
+        #levelUpModal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #levelUpModal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .level-up-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid #FFC107;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+            max-width: 90%;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .level-badge {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        /* EXP Bar */
+        .level-progress-container {
+            width: 80%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 10px auto;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .level-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FFC107, #FF9800);
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+        .exp-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        /* Interactive Words */
+        .word-link {
+            color: #0D8ABC;
+            text-decoration: underline dotted;
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .word-link:hover {
+            color: #ff5e62;
+            background: rgba(255, 230, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .game-level-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffeb3b;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .level-progress {
+            font-size: 12px;
+            color: #fff;
+            margin-left: 8px;
+            background: #6a11cb;
+            padding: 2px 6px;
+            border-radius: 10px;
+            vertical-align: middle;
+        }
+        /* LEVEL SELECTION GRID */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .level-btn {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .level-btn:hover:not(.locked) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            border-color: #4facfe;
+            color: #4facfe;
+        }
+
+        .level-btn.unlocked {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border: none;
+            color: #333;
+        }
+
+        .level-btn.locked {
+            background: #eee;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .level-btn.locked::after {
+            content: "🔒";
+            display: block;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .level-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="login-container">
+        <h2>🎮 GamiLearn</h2>
+        <p class="subtitle">Sign In to Continue</p>
+        <div class="error" id="error"></div>
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="loginUser" placeholder="Username">
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPass" placeholder="Password">
+        </div>
+        <button class="btn" onclick="login()">Sign In</button>
+        <p style="margin-top: 10px; font-size: 14px;"><a href="#" onclick="showForgotPassword()">Forgot Password?</a></p>
+        <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+    </div>
+
+    <!-- FORGOT PASSWORD SCREEN -->
+    <div id="forgot-screen" class="login-container" style="display:none;">
+        <h2>🔐 Reset Password</h2>
+        <div class="error" id="forgot-error"></div>
+        
+        <!-- Step 1: Verify Email -->
+        <div id="forgot-step-1">
+            <p class="subtitle">Enter your email to reset password</p>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="forgotEmail" placeholder="Enter Registered Email">
+            </div>
+            <button class="btn" onclick="verifyForgotEmail()">Verify Email</button>
+        </div>
+
+        <!-- Step 2: Verify Code -->
+        <div id="forgot-step-code" style="display:none;">
+            <p class="subtitle">Enter the 4-digit code sent to your email</p>
+            <div class="input-group">
+                <i class="fas fa-key"></i>
+                <input type="text" id="verifyCodeInput" placeholder="Enter Code">
+            </div>
+            <button class="btn" onclick="checkVerificationCode()">Verify Code</button>
+        </div>
+
+        <!-- Step 3: New Password -->
+        <div id="forgot-step-2" style="display:none;">
+            <p class="subtitle">Create a new password</p>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="resetPass" placeholder="New Password">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="resetConfirmPass" placeholder="Confirm New Password">
+            </div>
+            <button class="btn" onclick="resetPassword()">Update Password</button>
+        </div>
+
+        <p>Remembered it? <a href="#" onclick="showLogin()">Sign In</a></p>
+    </div>
+
+    <!-- SIGNUP SCREEN -->
+    <div id="signup-screen" class="login-container" style="display:none;">
+        <h2>📝 Create Account</h2>
+        <div class="error" id="signup-error"></div>
+        
+        <div class="input-group">
+            <i class="fas fa-id-card"></i>
+            <input type="text" id="newFullName" placeholder="Full Name">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="newEmail" placeholder="Email Address">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="newUser" placeholder="Choose Username">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="newPass" placeholder="Create Password">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="newConfirmPass" placeholder="Confirm Password">
+        </div>
+
+        <button class="btn" onclick="signup()">Sign Up</button>
+        <p>Already have an account? <a href="#" onclick="showLogin()">Sign In</a></p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard">
+        <div class="sidebar">
+            <h2 class="logo">🎮 GamiLearn</h2>
+            
+            <div class="profile-section">
+                <div class="avatar-container" onclick="openAvatarModal()">
+                    <img src="" id="sidebarAvatar" class="avatar" alt="Profile">
+                    <div class="avatar-overlay">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                </div>
+                <h3 class="profile-name" id="sidebarName">Player</h3>
+                <span class="profile-role">Level 1 Adventurer</span>
+            </div>
+
+            <ul>
+                <li onclick="showView('home')" id="nav-home">🏠 Dashboard</li>
+                <li onclick="showView('stories')" id="nav-stories">📘 Stories</li>
+                <li onclick="showView('games-menu')" id="nav-games">🎮 Games</li>
+                <li onclick="logout()">Sign Out</li>
+            </ul>
+        </div>
+
+        <div class="main">
+            
+            <!-- HOME VIEW -->
+            <div id="view-home" class="view active">
+                <h2 id="welcome" class="title"></h2>
+                <div class="cards">
+                    <div class="card" style="text-align: center;">
+                        <h3>🏆 Level</h3>
+                        <div class="level-circle" id="dashboardLevel">1</div>
+                        <div class="level-progress-container">
+                            <div class="level-progress-bar" id="expBar"></div>
+                        </div>
+                        <div class="exp-text" id="expText">0 / 100 EXP</div>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h3>⭐ Total Points</h3>
+                        <div class="bubble-points" id="totalPoints">0</div>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h3>🔥 Streak</h3>
+                        <div class="bubble-streak" id="streakCount">0</div>
+                    </div>
+                    <div class="card" style="text-align: center; display: none;" id="lastPlayedCard">
+                        <h3>🕒 Last Played</h3>
+                        <div id="lastPlayedIcon" style="font-size: 40px;">🎮</div>
+                        <div id="lastPlayedName" style="font-weight: bold; margin-top: 5px; margin-bottom: 5px;">None</div>
+                        <div id="lastPlayedLevel" style="color: #666; font-size: 14px; margin-bottom: 10px;">Level -</div>
+                        <button class="btn small" id="resumeBtn" style="padding: 5px 15px; font-size: 14px;">Play Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORIES LIST VIEW -->
+            <div id="view-stories" class="view">
+                <h2 class="lesson-title">📘 Story Adventures</h2>
+                
+                <div class="lesson-box">
+                    <h3>🏰 Story 1: The Prince of Numbers</h3>
+                    <p>Join the Prince and his dragon in a counting adventure!</p>
+                    <button class="start-btn" onclick="showStory('math')">Read Story →</button>
+                </div>
+
+                <div class="lesson-box">
+                    <h3>🛡️ Story 2: The Shape Shifters</h3>
+                    <p>Help the hero choose the right shield and weapons.</p>
+                    <button class="start-btn" onclick="showStory('shapes')">Read Story →</button>
+                </div>
+
+                <div class="lesson-box">
+                    <h3>🌈 Story 3: The Rainbow Village</h3>
+                    <p>Mix colors and solve patterns with the villagers.</p>
+                    <button class="start-btn" onclick="showStory('colors')">Read Story →</button>
+                </div>
+            </div>
+
+            <!-- STORY DETAIL VIEW -->
+            <div id="view-story-detail" class="view">
+                <div id="story-content" class="lesson-detail"></div>
+            </div>
+
+            <!-- QUIZ VIEW -->
+            <div id="view-quiz" class="view">
+                <div class="quiz-container" style="position: relative;">
+                    <div class="game-level-indicator">Level <span id="mathLevel">1</span>/10</div>
+                    <h2 class="quiz-title" id="quiz-title">📝 Quiz Time!</h2>
+                    <div id="questionBox" class="quiz-box">
+                        <h3 id="questionText">Loading...</h3>
+                        <div id="answerButtons"></div>
+                        <button id="nextBtn" class="next-btn" onclick="nextQuestion()" style="display:none;">Next Question →</button>
+                    </div>
+                    <button class="start-btn" style="margin-top:20px;" onclick="showView('stories')">⟵ Back to Stories</button>
+                </div>
+            </div>
+
+            <!-- GAMES MENU VIEW -->
+            <div id="view-games-menu" class="view">
+                <h2 class="title">🎮 Game Zone</h2>
+                <div class="game-grid">
+                    <div class="game-card" onclick="startMathGame()">
+                        <span class="game-icon">🧮</span>
+                        <h3>Math Whiz</h3>
+                        <p>Solve fun math problems!</p>
+                    </div>
+                    <div class="game-card" onclick="showLevelSelection('scramble')">
+                        <span class="game-icon">🔠</span>
+                        <h3>Word Scramble</h3>
+                        <p>Unscramble coding words!</p>
+                    </div>
+                    <div class="game-card" onclick="showLevelSelection('memory')">
+                        <span class="game-icon">🃏</span>
+                        <h3>Memory Match</h3>
+                        <p>Find the matching pairs!</p>
+                    </div>
+                    <div class="game-card" onclick="showLevelSelection('shape')">
+                        <span class="game-icon">🔺</span>
+                        <h3>Shape Logic</h3>
+                        <p>Find the odd one out!</p>
+                    </div>
+                    <div class="game-card" onclick="showLevelSelection('color')">
+                        <span class="game-icon">🎨</span>
+                        <h3>Color Mixer</h3>
+                        <p>Mix colors together!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEVEL SELECTION VIEW -->
+            <div id="view-level-select" class="view">
+                <div class="header">
+                    <h2 id="level-select-title">🚀 Select Level</h2>
+                </div>
+                <div style="text-align: center;">
+                    <p>Choose a level to start playing!</p>
+                    <div id="level-grid" class="level-grid">
+                        <!-- Buttons generated by JS -->
+                    </div>
+                    <br>
+                    <button class="btn secondary" onclick="showView('games-menu')">Back to Games</button>
+                </div>
+            </div>
+
+            <!-- MATH GAME VIEW -->
+            <div id="view-game-math" class="view">
+                <div class="quiz-container" style="position: relative;">
+                    <div class="game-level-indicator">Level <span id="mathLevel">1</span>/10 <span id="mathProgress" class="level-progress">Wins: 0/5</span></div>
+                    <h2>🧮 Math Whiz</h2>
+                    
+                    <!-- Settings Panel -->
+                    <div id="math-settings" class="settings-box">
+                        <div class="option-group">
+                            <label>Select Number System:</label>
+                            <button class="choice-btn active" onclick="setMathMode('decimal', this)">Decimal (1, 2, 3)</button>
+                            <button class="choice-btn" onclick="setMathMode('binary', this)">Binary (101, 010)</button>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label>Select Operation:</label>
+                            <button class="choice-btn active" onclick="setMathOp('add', this)">Addition (+)</button>
+                            <button class="choice-btn" onclick="setMathOp('sub', this)">Subtraction (-)</button>
+                            <button class="choice-btn" onclick="setMathOp('mul', this)">Multiplication (×)</button>
+                            <button class="choice-btn" onclick="setMathOp('div', this)">Division (÷)</button>
+                        </div>
+
+                        <button class="btn" onclick="showLevelSelection('math')">Select Level</button>
+                    </div>
+
+                    <!-- Game Panel -->
+                    <div id="math-game-panel" class="quiz-box" style="text-align: center; display: none;">
+                        <h3 id="mathQuestion" style="font-size: 40px;">2 + 2 = ?</h3>
+                        <div class="input-group">
+                            <input type="text" id="mathInput" placeholder="Your Answer" style="font-size: 20px; text-align: center;">
+                        </div>
+                        <button class="btn" onclick="checkMathAnswer()">Submit Answer</button>
+                        <p id="mathFeedback" style="margin-top: 15px; font-weight: bold;"></p>
+                        <button class="start-btn" style="background:#888; margin-top:10px;" onclick="resetMathSettings()">⚙️ Change Settings</button>
+                    </div>
+                    
+                    <button class="start-btn" style="margin-top:20px; background: #666;" onclick="showView('games-menu')">⟵ Back to Games</button>
+                </div>
+            </div>
+
+            <!-- WORD SCRAMBLE GAME VIEW -->
+            <div id="view-game-scramble" class="view">
+                <div class="quiz-container" style="position: relative;">
+                    <div class="game-level-indicator">Level <span id="scrambleLevel">1</span>/10 <span id="scrambleProgress" class="level-progress">Wins: 0/5</span></div>
+                    <h2>🔠 Word Scramble</h2>
+                    <div class="quiz-box" style="text-align: center;">
+                        <p>Unscramble this word:</p>
+                        <div id="scrambleWord" class="scramble-box">OLHEL</div>
+                        <div class="input-group">
+                            <input type="text" id="scrambleInput" placeholder="Type the word..." style="font-size: 20px; text-align: center;">
+                        </div>
+                        <button class="btn" onclick="checkScrambleAnswer()">Submit Answer</button>
+                        <p id="scrambleFeedback" style="margin-top: 15px; font-weight: bold;"></p>
+                    </div>
+                    <button class="start-btn" style="margin-top:20px; background: #666;" onclick="showView('games-menu')">⟵ Back to Games</button>
+                </div>
+            </div>
+
+            <!-- MEMORY GAME VIEW -->
+            <div id="view-game-memory" class="view">
+                <div class="quiz-container" style="max-width: 500px; position: relative;">
+                    <div class="game-level-indicator">Level <span id="memoryLevel">1</span>/10 <span id="memoryProgress" class="level-progress">Wins: 0/5</span></div>
+                    <h2>🃏 Memory Match</h2>
+                    <div class="quiz-box">
+                        <div class="memory-grid" id="memoryGrid"></div>
+                        <p id="memoryFeedback" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+                        <button class="btn" onclick="startMemoryGame()">Restart Game</button>
+                    </div>
+                    <button class="start-btn" style="margin-top:20px; background: #666;" onclick="showView('games-menu')">⟵ Back to Games</button>
+                </div>
+            </div>
+
+            <!-- SHAPE LOGIC GAME VIEW -->
+            <div id="view-game-shapes" class="view">
+                <div class="quiz-container" style="position: relative;">
+                    <div class="game-level-indicator">Level <span id="shapeLevel">1</span>/10 <span id="shapeProgress" class="level-progress">Wins: 0/5</span></div>
+                    <h2>🔺 Shape Logic</h2>
+                    <div class="quiz-box" style="text-align: center;">
+                        <p style="font-size: 18px;">Which one is different?</p>
+                        <div id="shapeGrid" style="display: flex; justify-content: center; gap: 20px; margin: 30px 0; font-size: 50px;">
+                            <!-- Shapes injected here -->
+                        </div>
+                        <p id="shapeFeedback" style="font-weight: bold; height: 24px;"></p>
+                    </div>
+                    <button class="start-btn" style="margin-top:20px; background: #666;" onclick="showView('games-menu')">⟵ Back to Games</button>
+                </div>
+            </div>
+
+            <!-- COLOR MIXER GAME VIEW -->
+            <div id="view-game-color" class="view">
+                <div class="quiz-container" style="position: relative;">
+                    <div class="game-level-indicator">Level <span id="colorLevel">1</span>/10 <span id="colorProgress" class="level-progress">Wins: 0/5</span></div>
+                    <h2>🎨 Color Mixer</h2>
+                    <div class="quiz-box" style="text-align: center;">
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 24px; margin-bottom: 20px;">
+                            <div id="color1" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #333;"></div>
+                            <span>+</span>
+                            <div id="color2" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #333;"></div>
+                            <span>=</span>
+                            <div style="width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #333; display: flex; align-items: center; justify-content: center;">?</div>
+                        </div>
+                        
+                        <p>What color do they make?</p>
+                        
+                        <div id="colorOptions" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                            <!-- Options injected here -->
+                        </div>
+
+                        <p id="colorFeedback" style="font-weight: bold; margin-top: 15px; height: 24px;"></p>
+                    </div>
+                    <button class="start-btn" style="margin-top:20px; background: #666;" onclick="showView('games-menu')">⟵ Back to Games</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LEVEL UP MODAL -->
+    <div id="levelUpModal">
+        <div class="level-up-content">
+            <span class="level-badge">🎉</span>
+            <h2 style="color: #333; margin-bottom: 10px;">LEVEL UP!</h2>
+            <p style="font-size: 18px; color: #666;">You reached Level <span id="newLevelSpan">2</span>!</p>
+            <button class="btn" onclick="closeLevelUp()" style="margin-top: 20px;">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- WORD DEFINITION MODAL -->
+    <div id="word-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalWord" style="font-size: 32px; color: #4facfe;">Word</h3>
+            <p id="modalDefinition" style="font-size: 18px; color: #555; margin: 20px 0;">Definition goes here.</p>
+            <button class="btn" onclick="speakWord()" style="background: #ff9a9e; margin-bottom: 15px;">
+                🔊 Say Word
+            </button>
+            <br>
+            <button class="modal-btn secondary" onclick="closeWordModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- AVATAR MODAL -->
+    <div id="avatar-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Choose Your Avatar</h3>
+            <p>Select an animal friend or upload your own!</p>
+            
+            <div class="avatar-grid" id="avatarGrid">
+                <!-- Animal Avatars will be injected here -->
+            </div>
+
+            <button class="modal-btn secondary" onclick="document.getElementById('avatarInput').click()">Upload Custom</button>
+            <input type="file" id="avatarInput" style="display: none;" accept="image/*" onchange="uploadAvatar(this)">
+            <button class="modal-btn secondary" onclick="closeAvatarModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const wordDefinitions = {
+            "kingdom": "A country ruled by a king or queen. 🏰",
+            "shiny": "Something bright that reflects light. ✨",
+            "treasures": "Precious things like gold, gems, or toys! 💎",
+            "mystery": "Something that is secret or hard to explain. 🕵️‍♂️",
+            "shield": "A piece of armor used to protect against attacks. 🛡️",
+            "equal": "Being the same in size, quantity, or value. =",
+            "villagers": "People who live in a small town or village. 🏘️",
+            "decorate": "To make something look more beautiful. 🎀",
+            "pattern": "A design that repeats itself. 🔴🔵🔴🔵"
+        };
+
+        const stories = {
+            math: `
+                <h2>🏰 The Prince of Numbers</h2>
+                <p>Once upon a time, in a <span class="word-link" onclick="showWord('kingdom')">kingdom</span> far away, lived a young Prince who loved to count.</p>
+                <p>One day, the Prince found <b>2 <span class="word-link" onclick="showWord('shiny')">shiny</span> red apples</b> in the garden.</p>
+                <p style="text-align:center; font-size:24px;">🍎 🍎</p>
+                <p>Suddenly, a friendly dragon flew down and gave him <b>3 magic gems</b>!</p>
+                <p style="text-align:center; font-size:24px;">💎 💎 💎</p>
+                <p>The Prince wondered, "How many <span class="word-link" onclick="showWord('treasures')">treasures</span> do I have now?"</p>
+                <div style="background:#eef; padding:15px; border-radius:10px; text-align:center; margin:20px 0;">
+                    <h3>🧠 The Math Magic:</h3>
+                    <p style="font-size:20px;">2 Apples + 3 Gems = <b>5 Treasures</b></p>
+                </div>
+                <p>The Prince was so happy! He now knew that <b>2 + 3 = 5</b>.</p>
+                <br>
+                <button class="start-btn" style="display:block; margin:auto;" onclick="startQuiz('math')">Take the Quiz →</button>
+                <br>
+                <button class="start-btn" style="background:#ccc; display:block; margin:auto;" onclick="showView('stories')">Back to Stories</button>
+            `,
+            shapes: `
+                <h2>🛡️ The Shape Shifters</h2>
+                <p>In a land of <span class="word-link" onclick="showWord('mystery')">mystery</span>, shapes could change everything!</p>
+                <p>Our hero needed a <span class="word-link" onclick="showWord('shield')">shield</span> to protect himself. He chose a shield that had no corners and was perfectly round.</p>
+                <p><b>"This is a Circle!"</b> he shouted.</p>
+                <p style="text-align:center; font-size:40px;">🔴</p>
+                <p>Later, he found a magic chest. It had 4 <span class="word-link" onclick="showWord('equal')">equal</span> sides and 4 sharp corners.</p>
+                <p><b>"This is a Square!"</b> he said.</p>
+                <p style="text-align:center; font-size:40px;">⬛</p>
+                <p>Finally, he saw a mountain with 3 sides and 3 points.</p>
+                <p><b>"That looks like a Triangle!"</b></p>
+                <p style="text-align:center; font-size:40px;">🔺</p>
+                <br>
+                <button class="start-btn" style="display:block; margin:auto;" onclick="startQuiz('shapes')">Take the Quiz →</button>
+                <br>
+                <button class="start-btn" style="background:#ccc; display:block; margin:auto;" onclick="showView('stories')">Back to Stories</button>
+            `,
+            colors: `
+                <h2>🌈 The Rainbow Village</h2>
+                <p>Welcome to the most colorful village in the world!</p>
+                <p>One day, the <span class="word-link" onclick="showWord('villagers')">villagers</span> wanted to paint their town hall. They had two big buckets of paint: <b>Red</b> and <b>Blue</b>.</p>
+                <p style="text-align:center; font-size:40px;">🔴 🔵</p>
+                <p>But they wanted a new color! So they mixed them together.</p>
+                <p><b>Red + Blue = Purple!</b></p>
+                <p style="text-align:center; font-size:40px;">🟣</p>
+                <p>Then, they decided to <span class="word-link" onclick="showWord('decorate')">decorate</span> the walls with a <span class="word-link" onclick="showWord('pattern')">pattern</span>:</p>
+                <div style="text-align:center; font-size:30px; background:#eee; padding:10px; border-radius:10px; margin:10px 0;">
+                    🔴 🔵 🔴 🔵 ❓
+                </div>
+                <p>Can you guess what comes next?</p>
+                <br>
+                <button class="start-btn" style="display:block; margin:auto;" onclick="startQuiz('colors')">Take the Quiz →</button>
+                <br>
+                <button class="start-btn" style="background:#ccc; display:block; margin:auto;" onclick="showView('stories')">Back to Stories</button>
+            `
+        };
+
+        const quizzes = {
+            math: [
+                { question: "How many apples did the prince have left?", answers: [{ text: "5", correct: true }, { text: "2", correct: false }, { text: "10", correct: false }] },
+                { question: "What happened when the dragon gave 3 gems?", answers: [{ text: "They disappeared", correct: false }, { text: "It became 2 + 3 = 5", correct: true }, { text: "It became 10", correct: false }] }
+            ],
+            shapes: [
+                { question: "What shape was the shield?", answers: [{ text: "Circle", correct: true }, { text: "Square", correct: false }, { text: "Triangle", correct: false }] },
+                { question: "Which item was a square?", answers: [{ text: "The Ball", correct: false }, { text: "The Magic Box", correct: true }, { text: "The Pyramid", correct: false }] }
+            ],
+            colors: [
+                { question: "What color did Red and Blue make?", answers: [{ text: "Green", correct: false }, { text: "Purple", correct: true }, { text: "Yellow", correct: false }] },
+                { question: "What was the pattern on the wall?", answers: [{ text: "Red, Blue, Red, Blue", correct: true }, { text: "Red, Red, Blue", correct: false }, { text: "Yellow, Green, Pink", correct: false }] }
+            ]
+        };
+
+        // --- STATE ---
+        let currentQuiz = [];
+        let currentIndex = 0;
+        let score = parseInt(localStorage.getItem("points")) || 0;
+        let generatedCode = "";
+        
+        // --- GAME LEVEL SYSTEM ---
+        let gameLevel = 1;
+        const maxGameLevel = 10;
+
+        function updateGameLevelUI(elementId) {
+            const el = document.getElementById(elementId);
+            if(el) el.innerText = gameLevel;
+        }
+
+        function updateLevelProgressUI(gameId, wins) {
+             const el = document.getElementById(gameId + "Progress");
+             if (el) {
+                 const currentMax = parseInt(localStorage.getItem(`level_progress_${gameId}`)) || 1;
+                 if (gameLevel < currentMax) {
+                     el.innerText = "Practice Mode";
+                     el.style.background = "#aaa";
+                 } else {
+                     el.innerText = `Wins: ${wins}/5`;
+                     el.style.background = "#6a11cb";
+                 }
+             }
+        }
+
+        function incrementGameLevel(elementId, gameId) {
+            const currentMax = parseInt(localStorage.getItem(`level_progress_${gameId}`)) || 1;
+            
+            // If playing a previous level, no progress
+            if (gameLevel < currentMax) {
+                return;
+            }
+
+            // At max level, track wins
+            let wins = parseInt(localStorage.getItem(`level_wins_${gameId}`)) || 0;
+            wins++;
+            
+            if (wins >= 5) {
+                // Unlock Next Level
+                wins = 0;
+                localStorage.setItem(`level_wins_${gameId}`, 0);
+                
+                if (gameLevel < maxGameLevel) {
+                    gameLevel++;
+                    localStorage.setItem(`level_progress_${gameId}`, gameLevel);
+                    updateGameLevelUI(elementId);
+                    
+                    // Show Level Up Message
+                    const progEl = document.getElementById(gameId + "Progress");
+                    if(progEl) {
+                        progEl.innerText = "LEVEL UP! 🎉";
+                        progEl.style.background = "#00e676";
+                    }
+                }
+            } else {
+                localStorage.setItem(`level_wins_${gameId}`, wins);
+                updateLevelProgressUI(gameId, wins);
+            }
+        }
+
+        // --- LEVEL SELECTION LOGIC ---
+        function showLevelSelection(gameId) {
+            showView('level-select');
+            
+            const maxLevel = parseInt(localStorage.getItem(`level_progress_${gameId}`)) || 1;
+            const grid = document.getElementById("level-grid");
+            grid.innerHTML = "";
+
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement("div");
+                btn.className = "level-btn";
+                btn.innerText = i;
+                
+                if (i <= maxLevel) {
+                    btn.classList.add("unlocked");
+                    btn.onclick = () => launchGameLevel(gameId, i);
+                } else {
+                    btn.classList.add("locked");
+                }
+                
+                grid.appendChild(btn);
+            }
+        }
+
+        function launchGameLevel(gameId, level) {
+            localStorage.setItem("last_played_id", gameId);
+            gameLevel = level;
+            
+            // Initialize Progress UI
+            setTimeout(() => {
+                const currentMax = parseInt(localStorage.getItem(`level_progress_${gameId}`)) || 1;
+                let currentWins = 0;
+                if (level === currentMax) {
+                    currentWins = parseInt(localStorage.getItem(`level_wins_${gameId}`)) || 0;
+                }
+                updateLevelProgressUI(gameId, currentWins);
+            }, 50);
+
+            if (gameId === 'math') {
+                document.getElementById("math-settings").style.display = "none";
+                document.getElementById("math-game-panel").style.display = "block";
+                showView('game-math');
+                updateGameLevelUI('mathLevel');
+                generateMathQuestion();
+            } else if (gameId === 'scramble') {
+                showView('game-scramble');
+                updateGameLevelUI('scrambleLevel');
+                nextScrambleWord();
+            } else if (gameId === 'memory') {
+                showView('game-memory');
+                updateGameLevelUI('memoryLevel');
+                startMemoryLevel();
+            } else if (gameId === 'shape') {
+                showView('game-shapes');
+                updateGameLevelUI('shapeLevel');
+                generateShapeLevel();
+            } else if (gameId === 'color') {
+                showView('game-colors');
+                updateGameLevelUI('colorLevel');
+                generateColorLevel();
+            }
+        }
+
+        const animalAvatars = [
+            "https://cdn-icons-png.flaticon.com/128/616/616408.png", // Owl
+            "https://cdn-icons-png.flaticon.com/128/616/616412.png", // Cat
+            "https://cdn-icons-png.flaticon.com/128/616/616430.png", // Dog
+            "https://cdn-icons-png.flaticon.com/128/616/616554.png", // Fox
+            "https://cdn-icons-png.flaticon.com/128/616/616480.png", // Panda
+            "https://cdn-icons-png.flaticon.com/128/616/616568.png", // Bear
+            "https://cdn-icons-png.flaticon.com/128/616/616494.png", // Penguin
+            "https://cdn-icons-png.flaticon.com/128/616/616489.png"  // Rabbit
+        ];
+
+        // --- AUTH ---
+        function checkAuth() {
+            if (localStorage.getItem("loggedIn") === "true") {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function login() {
+            const user = document.getElementById("loginUser").value;
+            const pass = document.getElementById("loginPass").value;
+            const savedUser = localStorage.getItem("username");
+            const savedPass = localStorage.getItem("password");
+
+            if (user === savedUser && pass === savedPass) {
+                localStorage.setItem("loggedIn", "true");
+                updateStreak();
+                showDashboard();
+            } else {
+                document.getElementById("error").innerText = "Invalid credentials!";
+            }
+        }
+
+        function signup() {
+            const fullName = document.getElementById("newFullName").value;
+            const email = document.getElementById("newEmail").value;
+            const user = document.getElementById("newUser").value;
+            const pass = document.getElementById("newPass").value;
+            const confirmPass = document.getElementById("newConfirmPass").value;
+
+            if (fullName && email && user && pass && confirmPass) {
+                if (pass !== confirmPass) {
+                    document.getElementById("signup-error").innerText = "Passwords do not match!";
+                    return;
+                }
+                localStorage.setItem("fullname", fullName);
+                localStorage.setItem("email", email);
+                localStorage.setItem("username", user);
+                localStorage.setItem("password", pass);
+                alert("Account created! Please sign in.");
+                showLogin();
+            } else {
+                document.getElementById("signup-error").innerText = "All fields required!";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            location.reload();
+        }
+
+        // --- NAVIGATION ---
+        function showLogin() {
+            document.getElementById("login-screen").style.display = "block";
+            document.getElementById("signup-screen").style.display = "none";
+            document.getElementById("forgot-screen").style.display = "none";
+            document.getElementById("dashboard").classList.remove("active");
+        }
+
+        function showSignup() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("signup-screen").style.display = "block";
+            document.getElementById("forgot-screen").style.display = "none";
+        }
+
+        function showForgotPassword() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("signup-screen").style.display = "none";
+            document.getElementById("forgot-screen").style.display = "block";
+            document.getElementById("dashboard").classList.remove("active");
+            
+            // Reset state
+            document.getElementById("forgot-step-1").style.display = "block";
+            document.getElementById("forgot-step-code").style.display = "none";
+            document.getElementById("forgot-step-2").style.display = "none";
+            document.getElementById("forgot-error").innerText = "";
+            document.getElementById("forgotEmail").value = "";
+            document.getElementById("verifyCodeInput").value = "";
+            generatedCode = "";
+        }
+
+        function verifyForgotEmail() {
+            const email = document.getElementById("forgotEmail").value;
+            const savedEmail = localStorage.getItem("email");
+
+            if (email && email === savedEmail) {
+                // Generate a 4-digit code
+                generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+                
+                // Simulate sending email
+                alert(`📧 Email sent to ${email}\nYour Verification Code is: ${generatedCode}`);
+                
+                // Move to next step
+                document.getElementById("forgot-step-1").style.display = "none";
+                document.getElementById("forgot-step-code").style.display = "block";
+                document.getElementById("forgot-error").innerText = "";
+            } else {
+                document.getElementById("forgot-error").innerText = "Email not found!";
+            }
+        }
+
+        function checkVerificationCode() {
+            const code = document.getElementById("verifyCodeInput").value;
+            
+            if (code === generatedCode) {
+                document.getElementById("forgot-step-code").style.display = "none";
+                document.getElementById("forgot-step-2").style.display = "block";
+                document.getElementById("forgot-error").innerText = "";
+            } else {
+                document.getElementById("forgot-error").innerText = "Invalid Code! Please try again.";
+            }
+        }
+
+        function resetPassword() {
+            const newPass = document.getElementById("resetPass").value;
+            const confirmPass = document.getElementById("resetConfirmPass").value;
+
+            if (newPass && confirmPass) {
+                if (newPass === confirmPass) {
+                    localStorage.setItem("password", newPass);
+                    alert("Password updated successfully!");
+                    showLogin();
+                } else {
+                    document.getElementById("forgot-error").innerText = "Passwords do not match!";
+                }
+            } else {
+                document.getElementById("forgot-error").innerText = "Please enter a new password.";
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("signup-screen").style.display = "none";
+            document.getElementById("forgot-screen").style.display = "none";
+            document.getElementById("dashboard").classList.add("active");
+            
+            const username = localStorage.getItem("username");
+            document.getElementById("welcome").innerText = "Welcome, " + username + " 🎉";
+            document.getElementById("sidebarName").innerText = username;
+            
+            loadAvatar();
+            updateLevel(); // Recalculate level
+            
+            document.getElementById("totalPoints").innerText = localStorage.getItem("points") || 0;
+            document.getElementById("streakCount").innerText = (localStorage.getItem("streak") || 0);
+            
+            // Last Played Logic
+            const lastId = localStorage.getItem("last_played_id");
+            if (lastId) {
+                const gameNames = {
+                    'math': 'Math Whiz',
+                    'scramble': 'Word Scramble',
+                    'memory': 'Memory Match',
+                    'shape': 'Shape Logic',
+                    'color': 'Color Mixer'
+                };
+                const gameIcons = {
+                    'math': '🧮',
+                    'scramble': '🔠',
+                    'memory': '🧠',
+                    'shape': '🔺',
+                    'color': '🎨'
+                };
+                
+                const savedProgress = localStorage.getItem(`level_progress_${lastId}`) || 1;
+                
+                document.getElementById("lastPlayedCard").style.display = "block";
+                document.getElementById("lastPlayedIcon").innerText = gameIcons[lastId] || '🎮';
+                document.getElementById("lastPlayedName").innerText = gameNames[lastId] || 'Unknown Game';
+                document.getElementById("lastPlayedLevel").innerText = "Unlocked: Level " + savedProgress;
+                document.getElementById("resumeBtn").onclick = () => showLevelSelection(lastId);
+            } else {
+                 document.getElementById("lastPlayedCard").style.display = "none";
+            }
+
+            showView('home');
+        }
+
+        function updateLevel() {
+            const currentPoints = parseInt(localStorage.getItem("points")) || 0;
+            const savedLevel = parseInt(localStorage.getItem("level")) || 1;
+            const calculatedLevel = Math.floor(currentPoints / 100) + 1;
+            
+            // EXP Progress
+            const progress = currentPoints % 100;
+            const bar = document.getElementById("expBar");
+            const txt = document.getElementById("expText");
+            
+            if(bar) bar.style.width = `${progress}%`;
+            if(txt) txt.innerText = `${progress} / 100 EXP`;
+
+            // Update Sidebar
+            document.querySelector('.profile-role').innerText = `Level ${calculatedLevel} Adventurer`;
+            
+            // Update Dashboard Bubble
+            const dashBubble = document.getElementById("dashboardLevel");
+            if(dashBubble) dashBubble.innerText = calculatedLevel;
+
+            // Check for Level Up
+            if (calculatedLevel > savedLevel) {
+                showLevelUp(calculatedLevel);
+                localStorage.setItem("level", calculatedLevel);
+            }
+        }
+
+        function showLevelUp(level) {
+            document.getElementById("newLevelSpan").innerText = level;
+            document.getElementById("levelUpModal").classList.add("active");
+        }
+
+        function closeLevelUp() {
+            document.getElementById("levelUpModal").classList.remove("active");
+        }
+
+        // --- WORD INTERACTION ---
+        function showWord(wordKey) {
+            const def = wordDefinitions[wordKey];
+            if (def) {
+                document.getElementById("modalWord").innerText = wordKey.charAt(0).toUpperCase() + wordKey.slice(1);
+                document.getElementById("modalDefinition").innerText = def;
+                document.getElementById("word-modal").style.display = "flex";
+                
+                // Store current word for TTS
+                window.currentWordToSpeak = wordKey;
+            }
+        }
+
+        function closeWordModal() {
+            document.getElementById("word-modal").style.display = "none";
+        }
+
+        function speakWord() {
+            if (window.currentWordToSpeak) {
+                const utterance = new SpeechSynthesisUtterance(window.currentWordToSpeak);
+                utterance.lang = 'en-US'; // Set language
+                utterance.rate = 0.9; // Slightly slower for clarity
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function loadAvatar() {
+            // Default avatar (using a placeholder service or base64)
+            const defaultAvatar = "https://ui-avatars.com/api/?name=" + (localStorage.getItem("username") || "User") + "&background=0D8ABC&color=fff";
+            const savedAvatar = localStorage.getItem("avatar");
+            
+            document.getElementById("sidebarAvatar").src = savedAvatar || defaultAvatar;
+        }
+
+        function openAvatarModal() {
+            const grid = document.getElementById("avatarGrid");
+            grid.innerHTML = ""; // Clear existing
+
+            animalAvatars.forEach(url => {
+                const img = document.createElement("img");
+                img.src = url;
+                img.className = "avatar-option";
+                img.onclick = () => selectAvatar(url);
+                grid.appendChild(img);
+            });
+
+            document.getElementById("avatar-modal").style.display = "flex";
+        }
+
+        function closeAvatarModal() {
+            document.getElementById("avatar-modal").style.display = "none";
+        }
+
+        function selectAvatar(url) {
+            localStorage.setItem("avatar", url);
+            document.getElementById("sidebarAvatar").src = url;
+            closeAvatarModal();
+        }
+
+        function uploadAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    // Save to local storage
+                    try {
+                        localStorage.setItem("avatar", base64Image);
+                        document.getElementById("sidebarAvatar").src = base64Image;
+                        closeAvatarModal();
+                    } catch (err) {
+                        alert("Image is too large to save! Please choose a smaller image.");
+                    }
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastLogin = localStorage.getItem("lastLogin");
+            let streak = parseInt(localStorage.getItem("streak")) || 0;
+
+            if (lastLogin !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastLogin === yesterday.toDateString()) {
+                    streak++;
+                } else {
+                    streak = 1;
+                }
+                localStorage.setItem("streak", streak);
+                localStorage.setItem("lastLogin", today);
+            }
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        }
+
+        function showStory(id) {
+            document.getElementById("story-content").innerHTML = stories[id];
+            showView('story-detail');
+        }
+
+        // --- QUIZ LOGIC ---
+        function startQuiz(id) {
+            currentQuiz = quizzes[id];
+            currentIndex = 0;
+            document.getElementById("quiz-title").innerText = "📝 " + id.charAt(0).toUpperCase() + id.slice(1) + " Quiz";
+            showView('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQuiz[currentIndex];
+            document.getElementById("questionText").innerText = q.question;
+            const btnContainer = document.getElementById("answerButtons");
+            btnContainer.innerHTML = "";
+            document.getElementById("nextBtn").style.display = "none";
+
+            q.answers.forEach(ans => {
+                const btn = document.createElement("button");
+                btn.className = "answer-btn";
+                btn.innerText = ans.text;
+                btn.onclick = () => selectAnswer(btn, ans.correct);
+                btnContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(btn, correct) {
+            if (correct) {
+                btn.classList.add("correct");
+                score += 10;
+                localStorage.setItem("points", score);
+                updateLevel();
+            } else {
+                btn.classList.add("wrong");
+            }
+            Array.from(document.getElementById("answerButtons").children).forEach(b => b.disabled = true);
+            document.getElementById("nextBtn").style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < currentQuiz.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("questionText").innerHTML = `Quiz Complete!<br>Total Score: ${score}`;
+                document.getElementById("answerButtons").innerHTML = "";
+                document.getElementById("nextBtn").style.display = "none";
+            }
+        }
+
+        // --- GAMES LOGIC ---
+
+        // 1. MATH WHIZ
+        let currentMathAnswer = 0;
+        let mathMode = 'decimal';
+        let mathOp = 'add';
+
+        function startMathGame() {
+            showView('game-math');
+            resetMathSettings();
+        }
+
+        function setMathMode(mode, btn) {
+            mathMode = mode;
+            // Update UI
+            const siblings = btn.parentElement.querySelectorAll('.choice-btn');
+            siblings.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setMathOp(op, btn) {
+            mathOp = op;
+            // Update UI
+            const siblings = btn.parentElement.querySelectorAll('.choice-btn');
+            siblings.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function resetMathSettings() {
+            document.getElementById("math-settings").style.display = "block";
+            document.getElementById("math-game-panel").style.display = "none";
+            document.getElementById("mathInput").value = "";
+            document.getElementById("mathFeedback").innerText = "";
+        }
+
+        function startMathRound() {
+            document.getElementById("math-settings").style.display = "none";
+            document.getElementById("math-game-panel").style.display = "block";
+            // Reset Level handled by launchGameLevel
+            updateGameLevelUI('mathLevel');
+            generateMathQuestion();
+        }
+
+        function generateMathQuestion() {
+            // Difficulty Scaling based on gameLevel (1-10)
+            let maxNum = 12; // Base
+            if (gameLevel > 2) maxNum = 20;
+            if (gameLevel > 5) maxNum = 50;
+            if (gameLevel > 8) maxNum = 100;
+
+            let n1, n2;
+            
+            if (mathMode === 'binary') {
+                // Binary difficulty
+                let bits = 3; // Level 1-2 (0-7)
+                if (gameLevel > 2) bits = 4; // Level 3-5 (0-15)
+                if (gameLevel > 5) bits = 5; // Level 6-8 (0-31)
+                if (gameLevel > 8) bits = 6; // Level 9-10 (0-63)
+                
+                n1 = Math.floor(Math.random() * (Math.pow(2, bits) - 1)) + 1;
+                n2 = Math.floor(Math.random() * (Math.pow(2, bits) - 1)) + 1;
+            } else {
+                n1 = Math.floor(Math.random() * maxNum) + 1;
+                n2 = Math.floor(Math.random() * maxNum) + 1;
+            }
+
+            // Calculate Answer
+            let symbol = "+";
+            
+            switch(mathOp) {
+                case 'add':
+                    currentMathAnswer = n1 + n2;
+                    symbol = "+";
+                    break;
+                case 'sub':
+                    // Ensure positive result
+                    if (n1 < n2) [n1, n2] = [n2, n1];
+                    currentMathAnswer = n1 - n2;
+                    symbol = "-";
+                    break;
+                case 'mul':
+                    // Keep numbers smaller for multiplication
+                    let mulMax = Math.ceil(maxNum / 2); 
+                    if (gameLevel > 5) mulMax = 12; // Cap at 12x12 for mental math usually
+                    
+                    if (mathMode === 'binary') {
+                        let bits = 3;
+                        if (gameLevel > 5) bits = 4;
+                        n1 = Math.floor(Math.random() * (Math.pow(2, bits) - 1)) + 1;
+                        n2 = Math.floor(Math.random() * (Math.pow(2, bits) - 1)) + 1;
+                    } else {
+                        n1 = Math.floor(Math.random() * mulMax) + 1;
+                        n2 = Math.floor(Math.random() * mulMax) + 1;
+                    }
+                    currentMathAnswer = n1 * n2;
+                    symbol = "×";
+                    break;
+                case 'div':
+                    // Generate numbers that divide cleanly
+                    let divMax = 10;
+                    if (gameLevel > 5) divMax = 12;
+                    
+                    n2 = Math.floor(Math.random() * divMax) + 1; // Divisor
+                    if (mathMode === 'binary') n2 = Math.floor(Math.random() * 5) + 1;
+                    
+                    currentMathAnswer = Math.floor(Math.random() * divMax) + 1; // Quotient
+                    if (mathMode === 'binary') currentMathAnswer = Math.floor(Math.random() * 5) + 1;
+                    
+                    n1 = currentMathAnswer * n2; // Dividend
+                    symbol = "÷";
+                    break;
+            }
+
+            // Display Question
+            let d1 = n1;
+            let d2 = n2;
+
+            if (mathMode === 'binary') {
+                d1 = n1.toString(2);
+                d2 = n2.toString(2);
+            }
+
+            document.getElementById("mathQuestion").innerText = `${d1} ${symbol} ${d2} = ?`;
+        }
+
+        function checkMathAnswer() {
+            let inputStr = document.getElementById("mathInput").value.trim();
+            if (!inputStr) return;
+
+            let inputVal;
+            const feedback = document.getElementById("mathFeedback");
+
+            if (mathMode === 'binary') {
+                if (!/^[01]+$/.test(inputStr)) {
+                    feedback.innerText = "Please enter a valid binary number (0s and 1s only)!";
+                    feedback.style.color = "orange";
+                    return;
+                }
+                inputVal = parseInt(inputStr, 2);
+            } else {
+                inputVal = parseFloat(inputStr);
+            }
+            
+            if (inputVal === currentMathAnswer) {
+                feedback.innerText = "Correct! 🎉 +10 EXP";
+                feedback.style.color = "green";
+                score += 10;
+                localStorage.setItem("points", score);
+                updateLevel(); // Check for level up
+                
+                // Increase Level
+                incrementGameLevel('mathLevel', 'math');
+
+                setTimeout(() => {
+                    generateMathQuestion();
+                    document.getElementById("mathInput").value = "";
+                    feedback.innerText = "";
+                }, 1500);
+            } else {
+                let correctDisplay = mathMode === 'binary' ? currentMathAnswer.toString(2) : currentMathAnswer;
+                feedback.innerText = `Try Again! The answer was ${correctDisplay} ❌`;
+                feedback.style.color = "crimson";
+                
+                // Allow retry or move on? Let's just generate new one after delay or let them retry? 
+                // Current logic shows answer. Let's let them retry? 
+                // No, standard flow is usually next question or retry. 
+                // Code above shows answer. Let's clear and next.
+                setTimeout(() => {
+                    generateMathQuestion();
+                    document.getElementById("mathInput").value = "";
+                    feedback.innerText = "";
+                }, 2000);
+            }
+        }
+
+        // 2. WORD SCRAMBLE
+        const scrambleWords = {
+            easy: ["BUG", "WEB", "APP", "CSS", "NET", "BOT", "RAM", "CPU", "GIT", "IDE"],
+            medium: ["HTML", "JAVA", "CODE", "DATA", "LOOP", "NODE", "VIEW", "USER", "FILE", "DISK"],
+            hard: ["PYTHON", "SCRIPT", "SERVER", "MOBILE", "CODING", "OBJECT", "STRING", "OUTPUT", "SYNTAX"],
+            expert: ["FUNCTION", "VARIABLE", "ALGORITHM", "DATABASE", "FRONTEND", "BACKEND", "BROWSER", "ELEMENT"]
+        };
+        let currentScrambleWord = "";
+
+        function startScrambleGame() {
+            showView('game-scramble');
+            // Level handled by launchGameLevel
+            updateGameLevelUI('scrambleLevel');
+            nextScrambleWord();
+            document.getElementById("scrambleInput").value = "";
+            document.getElementById("scrambleFeedback").innerText = "";
+        }
+
+        function nextScrambleWord() {
+            let list = scrambleWords.easy;
+            if (gameLevel > 3) list = scrambleWords.medium;
+            if (gameLevel > 6) list = scrambleWords.hard;
+            if (gameLevel > 8) list = scrambleWords.expert;
+
+            currentScrambleWord = list[Math.floor(Math.random() * list.length)];
+            const scrambled = currentScrambleWord.split('').sort(() => 0.5 - Math.random()).join('');
+            document.getElementById("scrambleWord").innerText = scrambled;
+        }
+
+        function checkScrambleAnswer() {
+            const input = document.getElementById("scrambleInput").value.toUpperCase();
+            const feedback = document.getElementById("scrambleFeedback");
+
+            if (input === currentScrambleWord) {
+                feedback.innerText = "Correct! 🎉 +15 EXP";
+                feedback.style.color = "green";
+                score += 15;
+                localStorage.setItem("points", score);
+                updateLevel();
+                
+                // Level Up
+                incrementGameLevel('scrambleLevel', 'scramble');
+
+                setTimeout(() => {
+                    nextScrambleWord();
+                    document.getElementById("scrambleInput").value = "";
+                    feedback.innerText = "";
+                }, 1500);
+            } else {
+                feedback.innerText = "Try Again! ❌";
+                feedback.style.color = "crimson";
+            }
+        }
+
+        // 3. MEMORY MATCH
+        const memoryIcons = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let totalPairs = 0;
+
+        function startMemoryGame() {
+            showView('game-memory');
+            gameLevel = 1;
+            updateGameLevelUI('memoryLevel');
+            startMemoryLevel();
+        }
+
+        function startMemoryLevel() {
+            const grid = document.getElementById("memoryGrid");
+            grid.innerHTML = "";
+            flippedCards = [];
+            matchedPairs = 0;
+            document.getElementById("memoryFeedback").innerText = "";
+
+            // Determine grid size based on level
+            let numPairs = 2;
+            if (gameLevel > 3) numPairs = 4;
+            if (gameLevel > 6) numPairs = 6;
+            if (gameLevel > 8) numPairs = 8; // Max 8 pairs (16 cards)
+
+            totalPairs = numPairs;
+
+            // Select random icons
+            const shuffledIcons = [...memoryIcons].sort(() => 0.5 - Math.random());
+            const selectedIcons = shuffledIcons.slice(0, numPairs);
+            
+            // Create deck
+            const deck = [...selectedIcons, ...selectedIcons].sort(() => 0.5 - Math.random());
+
+            // Adjust Grid Columns
+            if (numPairs === 2) grid.style.gridTemplateColumns = "repeat(2, 1fr)";
+            else if (numPairs === 4) grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+            else grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+
+            deck.forEach((icon, index) => {
+                const card = document.createElement("div");
+                card.className = "memory-card";
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+                card.onclick = () => flipCard(card);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
+                card.classList.add("flipped");
+                card.innerText = card.dataset.icon;
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            
+            if (c1.dataset.icon === c2.dataset.icon) {
+                matchedPairs++;
+                if (matchedPairs === totalPairs) {
+                    document.getElementById("memoryFeedback").innerText = "You Won! 🎉 +50 EXP";
+                    score += 50;
+                    localStorage.setItem("points", score);
+                    updateLevel();
+                    
+                    // Level Up
+                    incrementGameLevel('memoryLevel', 'memory');
+                    setTimeout(startMemoryLevel, 1500);
+                }
+            } else {
+                c1.classList.remove("flipped");
+                c1.innerText = "";
+                c2.classList.remove("flipped");
+                c2.innerText = "";
+            }
+            flippedCards = [];
+        }
+
+        // 4. SHAPE LOGIC GAME (Odd One Out)
+        const shapeLevels = [
+            { common: "🟥", odd: "🔴", commonName: "Square", oddName: "Circle" },
+            { common: "🔺", odd: "🔷", commonName: "Triangle", oddName: "Diamond" },
+            { common: "⭐", odd: "🌙", commonName: "Star", oddName: "Moon" },
+            { common: "🐱", odd: "🐶", commonName: "Cat", oddName: "Dog" },
+            { common: "🚗", odd: "✈️", commonName: "Car", oddName: "Plane" },
+            { common: "🍎", odd: "🍌", commonName: "Apple", oddName: "Banana" }
+        ];
+
+        function startShapeGame() {
+            showView('game-shapes');
+            gameLevel = 1;
+            updateGameLevelUI('shapeLevel');
+            generateShapeLevel();
+        }
+
+        function generateShapeLevel() {
+            const level = shapeLevels[Math.floor(Math.random() * shapeLevels.length)];
+            const container = document.getElementById("shapeGrid");
+            container.innerHTML = "";
+            document.getElementById("shapeFeedback").innerText = "";
+
+            // Difficulty: More items to scan
+            let commonCount = 2; // Level 1-3 (Total 3)
+            if (gameLevel > 3) commonCount = 3; // Level 4-6 (Total 4)
+            if (gameLevel > 6) commonCount = 5; // Level 7-10 (Total 6)
+
+            const items = [];
+            for(let i=0; i<commonCount; i++) {
+                items.push({ icon: level.common, isOdd: false });
+            }
+            items.push({ icon: level.odd, isOdd: true });
+
+            // Shuffle
+            items.sort(() => 0.5 - Math.random());
+
+            items.forEach(item => {
+                const btn = document.createElement("div");
+                btn.innerText = item.icon;
+                btn.style.cursor = "pointer";
+                btn.style.padding = "20px";
+                btn.style.border = "2px solid #ddd";
+                btn.style.borderRadius = "10px";
+                btn.style.transition = "transform 0.2s";
+                
+                btn.onmouseover = () => btn.style.transform = "scale(1.1)";
+                btn.onmouseout = () => btn.style.transform = "scale(1)";
+                
+                btn.onclick = () => checkShapeAnswer(item.isOdd, level);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkShapeAnswer(isOdd, levelData) {
+            const feedback = document.getElementById("shapeFeedback");
+            if (isOdd) {
+                feedback.innerText = `Correct! It was the ${levelData.oddName}! 🎉 +20 EXP`;
+                feedback.style.color = "green";
+                score += 20;
+                localStorage.setItem("points", score);
+                updateLevel();
+                
+                // Level Up
+                incrementGameLevel('shapeLevel', 'shape');
+                
+                setTimeout(generateShapeLevel, 1500);
+            } else {
+                feedback.innerText = "Oops! Look closely... ❌";
+                feedback.style.color = "crimson";
+            }
+        }
+
+        // 5. COLOR MIXER GAME
+        const colorMixes = [
+            { c1: "red", c2: "blue", res: "purple" },
+            { c1: "red", c2: "yellow", res: "orange" },
+            { c1: "blue", c2: "yellow", res: "green" },
+            { c1: "white", c2: "red", res: "pink" },
+            { c1: "black", c2: "white", res: "grey" },
+            { c1: "white", c2: "blue", res: "lightblue" },
+            { c1: "black", c2: "red", res: "darkred" }
+        ];
+        
+        const allColors = ["red", "blue", "yellow", "purple", "green", "orange", "pink", "grey", "white", "black", "brown", "cyan", "magenta", "lime", "olive", "maroon", "navy", "teal", "silver", "gold", "lightblue", "darkred"];
+
+        let currentColorLevel = null;
+
+        function startColorGame() {
+            showView('game-colors');
+            gameLevel = 1;
+            updateGameLevelUI('colorLevel');
+            generateColorLevel();
+        }
+
+        function generateColorLevel() {
+            // Difficulty: Mix Types
+            let availableMixes = colorMixes.slice(0, 3); // Basics
+            if (gameLevel > 3) availableMixes = colorMixes; // All
+
+            currentColorLevel = availableMixes[Math.floor(Math.random() * availableMixes.length)];
+            
+            // Set visuals
+            document.getElementById("color1").style.background = currentColorLevel.c1;
+            document.getElementById("color2").style.background = currentColorLevel.c2;
+            
+            const optionsContainer = document.getElementById("colorOptions");
+            optionsContainer.innerHTML = "";
+            document.getElementById("colorFeedback").innerText = "";
+
+            // Determine Number of Options
+            let numOptions = 3;
+            if (gameLevel > 3) numOptions = 4;
+            if (gameLevel > 6) numOptions = 6;
+
+            // Generate Options
+            let options = [currentColorLevel.res];
+            while (options.length < numOptions) {
+                const randomColor = allColors[Math.floor(Math.random() * allColors.length)];
+                if (!options.includes(randomColor) && randomColor !== currentColorLevel.res) {
+                    options.push(randomColor);
+                }
+            }
+
+            // Shuffle options
+            options.sort(() => 0.5 - Math.random());
+
+            options.forEach(color => {
+                const btn = document.createElement("button");
+                btn.style.background = color;
+                btn.style.width = "60px";
+                btn.style.height = "60px";
+                btn.style.borderRadius = "50%";
+                btn.style.border = "none";
+                btn.style.cursor = "pointer";
+                btn.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+                btn.style.margin = "0 10px";
+                btn.title = color.charAt(0).toUpperCase() + color.slice(1);
+                
+                btn.onclick = () => checkColorAnswer(color);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkColorAnswer(selectedColor) {
+            const feedback = document.getElementById("colorFeedback");
+            if (selectedColor === currentColorLevel.res) {
+                feedback.innerText = `Correct! ${currentColorLevel.c1} + ${currentColorLevel.c2} = ${selectedColor}! 🎉 +15 EXP`;
+                feedback.style.color = "green";
+                score += 15;
+                localStorage.setItem("points", score);
+                updateLevel();
+                
+                // Level Up
+                incrementGameLevel('colorLevel', 'color');
+
+                setTimeout(generateColorLevel, 2000);
+            } else {
+                feedback.innerText = "Not quite! Try again. ❌";
+                feedback.style.color = "crimson";
+            }
+        }
+
+        // Initialize
+        checkAuth();
+
+    </script>
+</body>
+</html>
